@@ -8,33 +8,93 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&display=swap');
 
-    /* ----- Envelope + Card animation timing (slowed) ----- */
+    /* ----- Envelope + Card animation timing ----- */
+    .perspective {
+      perspective: 1000px;
+    }
+
+    /* Realistic envelope with triangular flap */
+    .envelope-container {
+      position: relative;
+      width: 320px;
+      height: 200px;
+      margin: 0 auto;
+    }
+
+    .envelope-base {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, #e9d8b5, #d6c195);
+      border-radius: 0.5rem;
+      box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+      z-index: 1;
+    }
+
+    .envelope-flap {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      transform-origin: top center;
+      transition: transform 2.5s cubic-bezier(0.77, 0, 0.175, 1);
+      z-index: 3;
+    }
+
+    .envelope-flap::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, #f6e9cf, #e9d8b5);
+      clip-path: polygon(0 0, 50% 50%, 100% 0);
+      border-radius: 0.5rem 0.5rem 0 0;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
     .envelope-flap.open {
-      transform: rotateX(160deg);
-      transition: transform 5s ease-in-out; /* slowed from 3s to 5s */
+      transform: rotateX(180deg);
     }
 
     .invitation-card {
       opacity: 0;
-      transform: translateY(40px);
-      transition: opacity 3s ease-in-out, transform 3s ease-in-out; /* slowed from 2s to 3s */
+      position: absolute;
+      top: 15px;
+      left: 50%;
+      width: 90%;
+      height: 85%;
+      background-color: #fdfbf9;
+      border: 1px solid #e3d6b1;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      border-radius: 0.25rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      z-index: 2;
+      transform: translateX(-50%) translateY(20px);
+      transition: opacity 1.5s ease-in-out, transform 2s ease-in-out;
     }
 
     .invitation-card.show {
       opacity: 1;
-      transform: translateY(-10px);
+      transform: translateX(-50%) translateY(0);
     }
 
     /* Optional fade-out for the overlay */
     .fade-out {
       opacity: 0;
-      transition: opacity 4s ease-in-out, transform 4s ease-in-out; /* slowed from 10s to 4s */
+      transition: opacity 2s ease-in-out;
     }
 
     body {
       font-family: 'Cormorant Garamond', serif;
-      overflow-y: hidden; /* locked until start */
-      background: linear-gradient(to bottom, #f9f6fa, #fdfdff, #f5f0f8); /* soft ivory + lavender */
+      overflow-y: hidden;
+      background: linear-gradient(to bottom, #f9f6fa, #fdfdff, #f5f0f8);
     }
 
     html { scroll-behavior: smooth; }
@@ -43,7 +103,7 @@
     .floating-heart {
       position: fixed;
       bottom: -50px;
-      color: #a67894; /* dusty rose */
+      color: #a67894;
       font-size: 20px;
       animation: floatUp 6s linear infinite;
       opacity: 0.8;
@@ -61,7 +121,7 @@
     .petal {
       position: fixed;
       top: -40px;
-      color: #c8a2c8; /* lavender petals */
+      color: #c8a2c8;
       font-size: 22px;
       animation: fall 8s linear infinite;
       pointer-events: none;
@@ -91,7 +151,7 @@
       transform: scale(0.92);
       transition: opacity 2s ease, transform 2s ease;
       border-radius: 1rem;
-      box-shadow: 0 8px 25px rgba(166,120,148,0.25); /* soft rose glow */
+      box-shadow: 0 8px 25px rgba(166,120,148,0.25);
     }
     img.visible {
       opacity: 1;
@@ -102,7 +162,7 @@
     .quote {
       font-size: 1.6rem;
       font-weight: 400;
-      color: #6d5474; /* deep mauve */
+      color: #6d5474;
       opacity: 0;
       transform: translateY(30px);
       transition: opacity 2s ease, transform 2s ease;
@@ -121,9 +181,12 @@
     /* Overlay animations */
     #start-overlay {
       background: linear-gradient(135deg, #f6f2f7 0%, #fdfcff 100%);
+      background-image: url('');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
       overflow: hidden;
       animation: overlayFade 2s ease forwards;
-      background-image: url(./photos/ggwp.jpg);
     }
 
     @keyframes overlayFade {
@@ -182,6 +245,86 @@
       transform: scale(1);
       animation: romanticGlow 4s ease-in-out infinite alternate;
     }
+
+    /* Your Preferred Button Style */
+    .romantic-button {
+      background: linear-gradient(135deg, #fdf2ff 0%, #fce7ff 100%);
+      color: #8b5f8d;
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 600;
+      font-size: 1.2rem;
+      padding: 16px 40px;
+      border: 2px solid rgba(139, 95, 141, 0.3);
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      box-shadow: 0 8px 25px rgba(139, 95, 141, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 2rem;
+      backdrop-filter: blur(10px);
+    }
+
+    .romantic-button:hover {
+      transform: scale(1.08);
+      box-shadow: 0 12px 35px rgba(139, 95, 141, 0.4);
+      background: linear-gradient(135deg, #fce7ff 0%, #fdf2ff 100%);
+      border-color: rgba(139, 95, 141, 0.5);
+    }
+
+    .romantic-button:active {
+      transform: scale(0.95);
+    }
+
+    /* Button entrance animation */
+    @keyframes buttonEntrance {
+      0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.9);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .romantic-button {
+      animation: buttonEntrance 1.2s ease-out 0.8s both;
+    }
+
+    /* Emoji animations */
+    .emoji-sparkle {
+      display: inline-block;
+      animation: emojiFloat 2s ease-in-out infinite;
+    }
+
+    .emoji-sparkle:nth-child(1) {
+      animation-delay: 0s;
+    }
+
+    .emoji-sparkle:nth-child(2) {
+      animation-delay: 0.5s;
+    }
+
+    @keyframes emojiFloat {
+      0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+      }
+      33% {
+        transform: translateY(-3px) rotate(5deg);
+      }
+      66% {
+        transform: translateY(2px) rotate(-5deg);
+      }
+    }
+
+    /* Focus ring for accessibility */
+    .romantic-button:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(139, 95, 141, 0.3), 0 8px 25px rgba(139, 95, 141, 0.2);
+    }
   </style>
 </head>
 <body class="bg-stone-50 text-stone-700 leading-relaxed antialiased">
@@ -189,30 +332,34 @@
 <!-- Elegant Envelope Invitation Overlay -->
 <div id="start-overlay" class="fixed inset-0 z-50 flex items-center justify-center bg-[#f5efe7] transition-opacity duration-1000 ease-in-out opacity-100">
 
-  <div class="relative group w-64 h-56 perspective">
-    <!-- Envelope Base -->
-    <div class="absolute w-full h-full bg-gradient-to-b from-[#f6e9cf] to-[#e9d8b5] rounded-md shadow-xl envelope-base"></div>
-
-    <!-- Envelope Flap -->
-    <div class="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-[#e9d8b5] to-[#d6c195] rounded-t-md transform origin-bottom transition-transform duration-700 ease-in-out envelope-flap"></div>
-
-    <!-- Invitation Card -->
-    <div class="absolute top-6 left-1/2 -translate-x-1/2 w-[90%] h-[75%] bg-[#fdfbf9] border border-[#e3d6b1] shadow-md rounded-sm flex flex-col justify-center items-center text-center transition-all duration-700 ease-in-out opacity-0 invitation-card">
-      <h2 class="text-[#b59b6a] uppercase text-xs tracking-widest mb-2 font-serif">Save the Date</h2>
-      <h1 class="text-2xl font-serif text-[#3a2c1a] mb-1">You're Invited</h1>
-      <p class="text-sm text-[#806f55] italic mb-4">A special moment awaits</p>
-      <p class="text-xs text-[#b59b6a] tracking-wide">Tap below to begin</p>
+  <div class="relative group flex flex-col items-center">
+    <!-- Envelope Container -->
+    <div class="envelope-container perspective">
+      <!-- Envelope Base -->
+      <div class="envelope-base"></div>
+      
+      <!-- Invitation Card -->
+      <div class="invitation-card">
+        <h2 class="text-[#b59b6a] uppercase text-xs tracking-widest mb-2 font-serif">Save the Date</h2>
+        <h1 class="text-2xl font-serif text-[#3a2c1a] mb-1">You're Invited</h1>
+        <p class="text-sm text-[#806f55] italic mb-4">A special moment awaits</p>
+      </div>
+      
+      <!-- Envelope Flap with triangular shape -->
+      <div class="envelope-flap"></div>
     </div>
 
-    <!-- Button -->
-    <button id="startButton" class="absolute -bottom-16 left-1/2 -translate-x-1/2 bg-[#b59b6a] text-white font-medium py-3 px-8 rounded-full shadow-md hover:bg-[#9c845c] transition-transform duration-500 transform hover:scale-110 active:scale-95">
-      ✨ Begin Journey ✨
+    <!-- Your Preferred Button Style -->
+    <button id="startButton" class="romantic-button">
+      <span class="emoji-sparkle">💜</span>
+      Begin Journey
+      <span class="emoji-sparkle">💜</span>
     </button>
   </div>
 </div>
 
 <!-- Background Music -->
-<audio id="bg-music">
+<audio id="bg-music" loop>
   <source src="./Ed Sheeran - Perfect.mp3" type="audio/mpeg">
   Your browser does not support the audio tag.
 </audio>
@@ -273,7 +420,7 @@
 
   <!-- closing screen -->
   <div class="my-20 text-purple-700 text-4xl font-light fade-in" id="closing-text">
-    💍 We can’t wait to celebrate with you 💍
+    💍 We can't wait to celebrate with you 💍
   </div>
 </div>
 
@@ -284,14 +431,25 @@
   const overlay = document.getElementById('start-overlay');
 
   startButton.addEventListener('click', () => {
+    // Add click effect
+    startButton.style.transform = 'scale(0.95)';
+    
+    setTimeout(() => {
+      startButton.style.transform = 'scale(1)';
+    }, 150);
+
+    // Open the envelope flap
     flap.classList.add('open');
+    
+    // Show the card after a short delay
     setTimeout(() => {
       card.classList.add('show');
-    }, 1000); // slowed from 600ms
-
+    }, 1500);
+    
+    // Fade out the overlay after envelope animation completes
     setTimeout(() => {
       overlay.classList.add('fade-out');
-    }, 4000); // slowed from 2500ms
+    }, 4000);
   });
 
   window.addEventListener('load', () => {
@@ -300,7 +458,6 @@
     const invitationContainer = document.getElementById('invitation-container');
     const bgMusic = document.getElementById('bg-music');
 
-    // Floating hearts
     function createHeart() {
       const heart = document.createElement('div');
       heart.classList.add('floating-heart');
@@ -311,7 +468,6 @@
       setTimeout(() => heart.remove(), 6000);
     }
 
-    // Falling petals
     function createPetal() {
       const petal = document.createElement('div');
       petal.classList.add('petal');
@@ -323,7 +479,6 @@
       setTimeout(() => petal.remove(), 10000);
     }
 
-    // Intersection Observer for reveal
     const observer = new IntersectionObserver(entries => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -336,7 +491,6 @@
       observer.observe(el);
     });
 
-    // On start
     startButton.addEventListener('click', () => {
       window.scrollTo(0, 0);
       startOverlay.classList.add('opacity-0');
@@ -346,7 +500,7 @@
         invitationContainer.classList.remove('opacity-0');
         invitationContainer.classList.add('opacity-100');
 
-        // Music fade-in
+        // Play background music with fade in
         bgMusic.muted = false;
         bgMusic.volume = 0;
         bgMusic.currentTime = 0;
@@ -354,17 +508,16 @@
 
         let vol = 0;
         let fadeIn = setInterval(() => {
-          if (vol < 1) {
+          if (vol < 0.7) {
             vol += 0.02;
-            bgMusic.volume = Math.min(vol, 1);
+            bgMusic.volume = Math.min(vol, 0.7);
           } else clearInterval(fadeIn);
         }, 200);
 
-        // Hearts & petals start
+        // Start floating elements
         setInterval(createHeart, 1200);
         setInterval(createPetal, 1500);
-
-      }, 4500); // Wait longer before showing main content
+      }, 4500);
     });
   });
 </script>
