@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>You're Invited</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&display=swap');
+
+    /* ----- Envelope + Card animation timing (slowed) ----- */
+    .envelope-flap.open {
+      transform: rotateX(160deg);
+      transition: transform 5s ease-in-out; /* slowed from 3s to 5s */
+    }
+
+    .invitation-card {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 3s ease-in-out, transform 3s ease-in-out; /* slowed from 2s to 3s */
+    }
+
+    .invitation-card.show {
+      opacity: 1;
+      transform: translateY(-10px);
+    }
+
+    /* Optional fade-out for the overlay */
+    .fade-out {
+      opacity: 0;
+      transition: opacity 4s ease-in-out, transform 4s ease-in-out; /* slowed from 10s to 4s */
+    }
+
+    body {
+      font-family: 'Cormorant Garamond', serif;
+      overflow-y: hidden; /* locked until start */
+      background: linear-gradient(to bottom, #f9f6fa, #fdfdff, #f5f0f8); /* soft ivory + lavender */
+    }
+
+    html { scroll-behavior: smooth; }
+
+    /* Floating hearts */
+    .floating-heart {
+      position: fixed;
+      bottom: -50px;
+      color: #a67894; /* dusty rose */
+      font-size: 20px;
+      animation: floatUp 6s linear infinite;
+      opacity: 0.8;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    @keyframes floatUp {
+      0% { transform: translateY(0) scale(1); opacity: 0.9; }
+      50% { opacity: 1; }
+      100% { transform: translateY(-120vh) scale(1.3); opacity: 0; }
+    }
+
+    /* Falling petals */
+    .petal {
+      position: fixed;
+      top: -40px;
+      color: #c8a2c8; /* lavender petals */
+      font-size: 22px;
+      animation: fall 8s linear infinite;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    @keyframes fall {
+      0% { transform: translateX(0) rotate(0deg); opacity: 1; }
+      50% { transform: translateX(50px) rotate(180deg); opacity: 0.9; }
+      100% { transform: translateY(110vh) translateX(-50px) rotate(360deg); opacity: 0; }
+    }
+
+    /* Fade + elegant reveal */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(40px) scale(0.95);
+      transition: opacity 1.8s ease, transform 1.8s ease;
+    }
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    /* Zoom-in for images */
+    img {
+      opacity: 0;
+      transform: scale(0.92);
+      transition: opacity 2s ease, transform 2s ease;
+      border-radius: 1rem;
+      box-shadow: 0 8px 25px rgba(166,120,148,0.25); /* soft rose glow */
+    }
+    img.visible {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* Quotes with glow */
+    .quote {
+      font-size: 1.6rem;
+      font-weight: 400;
+      color: #6d5474; /* deep mauve */
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 2s ease, transform 2s ease;
+    }
+    .quote.visible {
+      opacity: 1;
+      transform: translateY(0);
+      animation: romanticGlow 4s ease-in-out infinite alternate;
+    }
+
+    @keyframes romanticGlow {
+      0% { text-shadow: 0 0 6px rgba(200,162,200,0.3); }
+      100% { text-shadow: 0 0 20px rgba(166,120,148,0.7); }
+    }
+
+    /* Overlay animations */
+    #start-overlay {
+      background: linear-gradient(135deg, #f6f2f7 0%, #fdfcff 100%);
+      overflow: hidden;
+      animation: overlayFade 2s ease forwards;
+      background-image: url(./photos/ggwp.jpg);
+    }
+
+    @keyframes overlayFade {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .overlay-box {
+      animation: overlayZoom 1.5s ease forwards;
+    }
+
+    @keyframes overlayZoom {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .animate-glow {
+      animation: glow 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes glow {
+      0% { text-shadow: 0 0 5px rgba(200,162,200,0.4), 0 0 10px rgba(166,120,148,0.6); }
+      100% { text-shadow: 0 0 20px rgba(166,120,148,0.9), 0 0 35px rgba(200,162,200,0.8); }
+    }
+
+    .animate-shimmer {
+      animation: shimmer 2.5s ease-in-out infinite;
+    }
+
+    @keyframes shimmer {
+      0% { opacity: 0.7; }
+      50% { opacity: 1; }
+      100% { opacity: 0.7; }
+    }
+
+    .animate-floating {
+      animation: floating 3s ease-in-out infinite;
+    }
+
+    @keyframes floating {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+      100% { transform: translateY(0); }
+    }
+
+    /* Closing text */
+    #closing-text {
+      text-shadow: 0 0 10px rgba(166,120,148,0.7);
+      transform: scale(0.9);
+      opacity: 0;
+      transition: opacity 2s ease, transform 2s ease;
+    }
+
+    #closing-text.visible {
+      opacity: 1;
+      transform: scale(1);
+      animation: romanticGlow 4s ease-in-out infinite alternate;
+    }
+  </style>
+</head>
+<body class="bg-stone-50 text-stone-700 leading-relaxed antialiased">
+
+<!-- Elegant Envelope Invitation Overlay -->
+<div id="start-overlay" class="fixed inset-0 z-50 flex items-center justify-center bg-[#f5efe7] transition-opacity duration-1000 ease-in-out opacity-100">
+
+  <div class="relative group w-64 h-56 perspective">
+    <!-- Envelope Base -->
+    <div class="absolute w-full h-full bg-gradient-to-b from-[#f6e9cf] to-[#e9d8b5] rounded-md shadow-xl envelope-base"></div>
+
+    <!-- Envelope Flap -->
+    <div class="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-[#e9d8b5] to-[#d6c195] rounded-t-md transform origin-bottom transition-transform duration-700 ease-in-out envelope-flap"></div>
+
+    <!-- Invitation Card -->
+    <div class="absolute top-6 left-1/2 -translate-x-1/2 w-[90%] h-[75%] bg-[#fdfbf9] border border-[#e3d6b1] shadow-md rounded-sm flex flex-col justify-center items-center text-center transition-all duration-700 ease-in-out opacity-0 invitation-card">
+      <h2 class="text-[#b59b6a] uppercase text-xs tracking-widest mb-2 font-serif">Save the Date</h2>
+      <h1 class="text-2xl font-serif text-[#3a2c1a] mb-1">You're Invited</h1>
+      <p class="text-sm text-[#806f55] italic mb-4">A special moment awaits</p>
+      <p class="text-xs text-[#b59b6a] tracking-wide">Tap below to begin</p>
+    </div>
+
+    <!-- Button -->
+    <button id="startButton" class="absolute -bottom-16 left-1/2 -translate-x-1/2 bg-[#b59b6a] text-white font-medium py-3 px-8 rounded-full shadow-md hover:bg-[#9c845c] transition-transform duration-500 transform hover:scale-110 active:scale-95">
+      ✨ Begin Journey ✨
+    </button>
+  </div>
+</div>
+
+<!-- Background Music -->
+<audio id="bg-music">
+  <source src="./Ed Sheeran - Perfect.mp3" type="audio/mpeg">
+  Your browser does not support the audio tag.
+</audio>
+
+<!-- Floating hearts & petals -->
+<div id="hearts-container"></div>
+<div id="petals-container"></div>
+
+<!-- Invitation Content -->
+<div id="invitation-container" class="relative w-full flex flex-col items-center justify-start text-center py-20 px-6 opacity-0 transition-opacity duration-1000 ease-in-out">
+  
+  <div class="mb-12 fade-in">
+    <img src="./photos/7DecN&T.pptx-1.jpg" width="1700" height="720">
+    <p class="quote mt-4">"Two souls, one journey, endless love."</p>
+  </div>
+
+  <div class="w-full h-px bg-stone-300 my-8"></div>
+  <div class="mb-12 fade-in">
+    <img src="./photos/7DecN&T.pptx-2.jpg">
+    <p class="quote mt-4">"This day marks the start of forever."</p>
+  </div>
+
+  <div class="w-full h-px bg-stone-300 my-8"></div>
+  <div class="mb-12 fade-in">
+    <img src="./photos/7DecN&T.pptx-3.jpg">
+    <p class="quote mt-4">"Together is our favorite place to be."</p>
+  </div>
+
+  <div class="w-full h-px bg-stone-300 my-8"></div>
+  <div class="mb-12 fade-in">
+    <img src="./photos/7DecN&T.pptx-4.jpg">
+    <p class="quote mt-4">"Love is not about how many days, but how deeply every moment is shared."</p>
+  </div>
+
+  <div class="w-full h-px bg-stone-300 my-8"></div>
+  <div class="mb-12 fade-in">
+    <img src="./photos/7DecN&T.pptx -5.jpg">
+    <p class="quote mt-4">"Every picture tells our love story."</p>
+  </div>
+
+  <div class="w-full h-px bg-stone-300 my-8"></div>
+  <div class="mb-12 fade-in">
+    <img src="./photos/7DecN&T.pptx-6.jpg">
+    <p class="quote mt-4">"A day to remember, a love to cherish forever."</p>
+  </div>
+
+  <div class="w-full h-px bg-stone-300 my-8"></div>
+  <div class="mb-12 fade-in">
+    <img src="./photos/7DecN&T.pptx-7.jpg">
+    <p class="quote mt-4">"Dreams do come true when we are together."</p>
+  </div>
+
+  <div class="w-full h-px bg-stone-300 my-8"></div>
+  <div class="mb-12 fade-in">
+    <img src="./photos/7DecN&T.pptx-8.jpg">
+    <p class="quote mt-4">"With you, every chapter is magical."</p>
+  </div>
+
+  <!-- closing screen -->
+  <div class="my-20 text-purple-700 text-4xl font-light fade-in" id="closing-text">
+    💍 We can’t wait to celebrate with you 💍
+  </div>
+</div>
+
+<script>
+  const startButton = document.getElementById('startButton');
+  const flap = document.querySelector('.envelope-flap');
+  const card = document.querySelector('.invitation-card');
+  const overlay = document.getElementById('start-overlay');
+
+  startButton.addEventListener('click', () => {
+    flap.classList.add('open');
+    setTimeout(() => {
+      card.classList.add('show');
+    }, 1000); // slowed from 600ms
+
+    setTimeout(() => {
+      overlay.classList.add('fade-out');
+    }, 4000); // slowed from 2500ms
+  });
+
+  window.addEventListener('load', () => {
+    const startButton = document.getElementById('startButton');
+    const startOverlay = document.getElementById('start-overlay');
+    const invitationContainer = document.getElementById('invitation-container');
+    const bgMusic = document.getElementById('bg-music');
+
+    // Floating hearts
+    function createHeart() {
+      const heart = document.createElement('div');
+      heart.classList.add('floating-heart');
+      heart.innerHTML = Math.random() > 0.5 ? '💜' : '🤍';
+      heart.style.left = Math.random() * 100 + 'vw';
+      heart.style.fontSize = (20 + Math.random() * 20) + 'px';
+      document.getElementById('hearts-container').appendChild(heart);
+      setTimeout(() => heart.remove(), 6000);
+    }
+
+    // Falling petals
+    function createPetal() {
+      const petal = document.createElement('div');
+      petal.classList.add('petal');
+      petal.innerHTML = '🌸';
+      petal.style.left = Math.random() * 100 + 'vw';
+      petal.style.fontSize = (18 + Math.random() * 12) + 'px';
+      petal.style.animationDuration = (6 + Math.random() * 4) + 's';
+      document.getElementById('petals-container').appendChild(petal);
+      setTimeout(() => petal.remove(), 10000);
+    }
+
+    // Intersection Observer for reveal
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.2 });
+
+    document.querySelectorAll('.fade-in, .quote, img, #closing-text').forEach(el => {
+      observer.observe(el);
+    });
+
+    // On start
+    startButton.addEventListener('click', () => {
+      window.scrollTo(0, 0);
+      startOverlay.classList.add('opacity-0');
+      setTimeout(() => {
+        startOverlay.style.display = 'none';
+        document.body.style.overflowY = 'auto';
+        invitationContainer.classList.remove('opacity-0');
+        invitationContainer.classList.add('opacity-100');
+
+        // Music fade-in
+        bgMusic.muted = false;
+        bgMusic.volume = 0;
+        bgMusic.currentTime = 0;
+        bgMusic.play().catch(err => console.log("Playback error:", err));
+
+        let vol = 0;
+        let fadeIn = setInterval(() => {
+          if (vol < 1) {
+            vol += 0.02;
+            bgMusic.volume = Math.min(vol, 1);
+          } else clearInterval(fadeIn);
+        }, 200);
+
+        // Hearts & petals start
+        setInterval(createHeart, 1200);
+        setInterval(createPetal, 1500);
+
+      }, 4500); // Wait longer before showing main content
+    });
+  });
+</script>
+</body>
+</html>
